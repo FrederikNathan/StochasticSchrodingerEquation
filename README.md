@@ -38,4 +38,9 @@ SSE_Evolution:
 Runs stochastic Schrodinger Equation, using the jump operators. Uses data from ../Data/FloquetSpectra and ../Data/JumpOperators/.  Saves data in../Data/InteractionPictureEvolutions.  Writes logs to ../Logs/SSE/.  
   
 DataExtractorStrob:  
-Extracts data from ../Data/InteractionPictureEvolutions, and plots releveant data. Can be modified to plot other relevant data. Relies on data from ../Data/FloquetSpectra and ../Data/InteractionPictureEvolution/.  Saves data in../Data/InteractionPictureEvolutions.   
+Extracts data from ../Data/InteractionPictureEvolutions, and plots releveant data. Can be modified to plot other relevant data. Relies on data from ../Data/FloquetSpectra and ../Data/InteractionPictureEvolution/.  Saves data in../Data/InteractionPictureEvolutions.
+
+## Running the code  
+To run the code, make sure all directories above exist. Then Run SSE_Evolution.py with the desired parameters set. Auxilliary data will automatically be created using the other scripts, if it is not already generated. 
+
+Data is saved to the disk every 30 minutes during the iterative solution. At any point, the already-generated data can be examined using DataExtractorStrob.py 
