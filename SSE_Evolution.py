@@ -74,11 +74,11 @@ CreateNewData=True
 # ID for run
 RunID="%s_%d_%s_"%(RunID_gen(),n0,str(s))
 
-#0.00063662
+# script can be launched with ArgV. Otherwise, specify parameters here. (See below for explanation of parameters)
 if not len(sys.argv)>2:
     sys.argv[1:]=[400  ,1.618033988750,0.5*pi, 10,   10 ,        0.0008,     0.00,    300,       0,        16,    -12, 5000]#,     100         ,0.05]
                 # N, ratio,        eta,  A_2,  M,   gamma_c, gamma_s,   Res_drive, Nres_out, N_trotter,  treshlog, Nperiods 
-    OutputToConsole=True
+    OutputToConsole=True # Direct output to console (instead of log files). 
 elif len(sys.argv)==2:
     K=str(sys.argv[1])
     if K=="Log":
@@ -104,7 +104,7 @@ BF.__init__()
 #==============================================================================
 
 ### A: System parameters
-N     = int(sys.argv[1])         # size of lattice 
+N     = int(sys.argv[1])         # size of lattice (# of photon states)
 ratio = float(sys.argv[2])       # 1.61803398875
 eta   = float(sys.argv[3])       # 5*pi     # coupling between spin and field
 A_2   = float(sys.argv[4])       # Amplitude of driving field
@@ -133,8 +133,6 @@ dtau                = dt/(2**N_trotter)
 # Number of time-evolution steps
 TimeSteps           = Resolution_drive*(2**Nres_out)
 
-# log10 of treshold for discarding entries of dU
-#treshlog            = NSF.treshlog    
 
 
 ## C: Jump operator resolution parameters (see NSF for details)
@@ -151,7 +149,6 @@ N_att               = int(Res_SSE/Resolution_jump+0.1)
 Nout = int(NT/Dt_out+0.999)   # Total number of output data points
 
 
-#NT_J                 = TimeSteps_J
 
 # Time interval between jump attempts
 DT_att=DT_J/N_att #0.05 # Time step for SEE evolution     
@@ -224,7 +221,6 @@ PhotonCountOperator=Eigenvectors.conj().T.dot(PhotonCountOperator.dot(Eigenvecto
 ### A: Initial state 
 Psi0=GaussianPacketGenerator(N,n0,s,sigma,0)
 
-
 # Changing to basis of Floquet eigenstates 
 Psi0=(Eigenvectors.conj().T).dot(Psi0)
 
@@ -271,6 +267,7 @@ nOut=0
 t=0
 tout_last=1
 
+# Functions used to save data from current state (to be called repeatedly during iterative solution). 
 def SaveFunc():     
 
     OutputDir="../Data/InteractionPictureEvolutions/"+ParmDir_gen(N,ratio,eta,A_2,M,gamma_c,gamma_s)+"/"
