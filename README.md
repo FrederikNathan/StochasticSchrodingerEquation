@@ -26,7 +26,7 @@ BasicFunctions:
 basic helping functions, such as filename search, timing and string parsing  
   
 NoiseSimulationFunctions:   
-helping functions specific for the quantum problem and code, including creation of basic building block matrices, file-naming functions etc  
+helping functions specific for the quantum problem and code, including creation of basic building block matrices, file-naming functions etc. Importantly, inert parameters (that have to do with the simulation's accuracy) are defined here
 
 FloquetOperatorGenerator:  
 Finds the Floquet operator for the unitary problem, and diagonalizes it. Saves data under ../Data/FloquetSpectra/. Writes logs to ../Logs/FloquetOperatorGenerator/  
