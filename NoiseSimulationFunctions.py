@@ -21,6 +21,7 @@ from BasicFunctions import *
 # 0: Simulation Parameters
 #==============================================================================
 
+# These parameters specify the resolution of the simulation, and do not need to be changed. 
 
 treshlog=-12
 
