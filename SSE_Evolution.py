@@ -138,14 +138,8 @@ TimeSteps           = Resolution_drive*(2**Nres_out)
 
 
 ## C: Jump operator resolution parameters (see NSF for details)
-#CutoffRel           = NSF.CutoffRel
-#NblocksTot          = NSF.NblocksTot
 Resolution_jump     = int(NSF.Resolution_jump+0.1) # Time resolution of jump operator 
 Res_SSE             = NSF.Res_SSE       # Number of jump attempts per driving period. 
-#nsteps_out          = NSF.Nsteps_out    # Number of recordings per driving period
-#NBlocksW            = NSF.NBlocksW
-#Wlist               = NSF.Wlist
-#dWlist              = NSF.dWlist
 
 # Time interval in which jump operators are assumed constant
 DT_J=1/NSF.Resolution_jump
@@ -184,8 +178,6 @@ JumpOperatorDir="../Data/JumpOperators/"+FloquetDir_gen(N,ratio,eta,A_2,M,Resolu
 
 # Resolution parameter directory 
 InputDir=JumpOperatorDir#ParmDir+ResDir_gen(Resolution_drive,Nres_out,nW,NT_J,CutoffRel,NBlocksW)+"/"
- 
-
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 # 2.1: Load processed data 
@@ -210,9 +202,6 @@ JOS_Sx        = load_pickle(InputDir+"JOS_Sx.dat")
 JOS_Sy        = load_pickle(InputDir+"JOS_Sy.dat")
 JOS_Sz        = load_pickle(InputDir+"JOS_Sz.dat")
 
-
-
-
 # Decay operators
 DC           = gamma_c*load_pickle(InputDir+"Heff_Cavity.dat")
 DX           = gamma_s*load_pickle(InputDir+"Heff_Sx.dat")
@@ -221,8 +210,6 @@ DZ           = gamma_s*load_pickle(InputDir+"Heff_Sz.dat")
 
 # Net decay operator
 DecayOperatorList = DC+DX+DY+DZ
-
-
 
 AnnihilationOperator=NSF.AnnihilationOperator(N)
 PhotonCountOperator=AnnihilationOperator.conj().T.dot(AnnihilationOperator)
@@ -253,31 +240,15 @@ tnow0=time.time()
 for nJ in range(0,Resolution_jump):
     if (nJ%10)==0:
         Log("    At time step %d/%d"%(nJ,Resolution_jump))
-#    for natt in range(0,N_att):
-#        nRes=nJ*N_att+natt
-#        
-##        B=Blist[:,:,nRes]
-##        N_cav=(B.conj().T).dot(B)
+
     Heff=-0.5j*DecayOperatorList[:,:,nJ]+diag(QE)
 
     Ueff=expm(-1j*DT_att*Heff)
     
     UeffList[:,:,nJ]=Ueff
     
-    # UeffList[:,:,nJ]: Time-evolution operator from nJ*DT_J to nJ*DT_J+DT_att
         
 Log("    Done. Time spent: %.2f s"%(time.time()-tnow0))   
-#    
-#### C: Setting variables in NoiseSimulationScript
-#NSF.BlockIntervals  = BlockIntervals
-#NSF.omega2          = omega2
-#NSF.dq              = dq
-#NSF.GammaMat        = GammaMat
-#NSF.QEMat           = QEMat 
-#NSF.N               = N
-#NSF.freqvec         = freqvec    
-#NSF.gamma_c         = gamma_c
-#    
 
 
 ### D: Defining dynamical lists and variables   
@@ -338,8 +309,6 @@ for nT in range(0,NT):
     
     # Display progress every 5 driving periods
     if nT%5==0:
-#        Log("")
-#        Log("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
         Log("At time step %d/%d"%(nT,NT))
         
         Nphotons=ExpVal(PhotonCountOperator,Psi)
@@ -349,7 +318,7 @@ for nT in range(0,NT):
         
         if Nphotons<10:
             savez("../Warnings/"+"Warning_%d_%s.npz"%(nT,RunID),nT)
-#        Log("")
+
         
 
     # Iterate over steps, in each of which the jump operator is assumed constant
@@ -368,6 +337,7 @@ for nT in range(0,NT):
         dx=DX[:,:,nJ]
         dy=DY[:,:,nJ]
         dz=DZ[:,:,nJ]
+        
         # Iterate over the attempt time intervals 
         for n_att in range(0,N_att):
 
@@ -387,8 +357,7 @@ for nT in range(0,NT):
                 nOut+=1
         
             tout_last=t%Dt_out
-            
-#            print(t)
+  
             Psi=Ueff.dot(Psi) # Evolve Psi
             Psi=Psi/norm(Psi) # Normalize
             
@@ -396,49 +365,34 @@ for nT in range(0,NT):
 
             ### C: Check for decay
 
-            # Expectation value of decay operator * time step DT_att 
-#            S=DT_att*abs(ExpVal(D,Psi))
-            
-#            # Expectation value of decay operator * time step DT_att 
-#            Scav=DT_att*2*pi*gamma_c*norm(B.dot(Psi))**2
-#            Sspin=DT_att*abs(ExpVal(DecayOperatorsSpin[:,:,nJ],Psi))
-#            
-#            S=Scav+Sspin
-##            Log(S)
-            
+            # Calculate probability for decay in time-interval t,t+DT_att            
             Q = DT_att*abs(ExpVal(D,Psi))
             
-            # Random number in [0,1]. 
+            # Random number in [0,1] used to stochastically decide if decay should occur.
             R=npr.rand()
 
             # For decay to happen, R must be < Q
             if R<Q:
-#                Log("    Decay")
-#                Log("        Time            : %.2f  "%t)
-#                
 
-                
+                # Determine whether decay happens in cavity or either of the 3 spin channels:
                 
                 QC=abs(DT_att*ExpVal(dc,Psi))
-
                 
-#                if not abs(QX+QY+QZ+QC-Q)<0.001*Q:
-#                    raise ValueError("The proababilities don't add up")
-
+                # Check if decay is in cavity channel
                 if R<QC:
                     DecayType="Cavity"                  
                     L=NSF.JumpOperatorExtractor(JOS_Cavity,t,Freqs)
-                    
-#                    K1=norm(L.dot(Psi))**2
-#                    K2=ExpVal(L.conj().T.dot(L),Psi)
-#                    print("Ratio= %f"%(K1/K2))
-                    
+
                 else:
+                    
                     QX=abs(DT_att*ExpVal(dx,Psi))
                     
+                    # Check if decay is in SX channel
                     if R<QC+QX:
                         DecayType="Sx"
                         L=NSF.JumpOperatorExtractor(JOS_Sx,t,Freqs)
+                        
+                    # Check if decay is in SY  channel
                     else:
                         QY=abs(DT_att*ExpVal(dy,Psi))
                         
@@ -446,25 +400,18 @@ for nT in range(0,NT):
                             DecayType="Sy"
                             L=NSF.JumpOperatorExtractor(JOS_Sy,t,Freqs)
 
-#                elif R<QC+QX+QY:
-
-                    
+                        # Otherwise, decay must be in SZ channel
                         else:
                             DecayType="Sz"
                             L=NSF.JumpOperatorExtractor(JOS_Sz,t,Freqs)
                                                 
-                                                
+                # Evolve wavefunction with cdecay operators                             
                 PsiOld=Psi                             
                 Psi=L.dot(Psi)
                 Psi=Psi/norm(Psi) 
-                Nphotons=ExpVal(PhotonCountOperator,Psi)
-#                if Nphotons>170:
-#                    raise ValueError
-                
-#                Log("        Type            : %s"%DecayType)
-#                Log("        CPU time so far : %.2f s"%(time.time()-tnow))
-#                Log("")                               
-                    
+                Nphotons=ExpVal(PhotonCountOperator,Psi)                           
+                   
+                # Add decay event to list of decay events 
                 DecayStats=[t,DecayType,"Time, Type"]
                 DecayList.append(DecayStats)       
 
@@ -473,41 +420,4 @@ for nT in range(0,NT):
 # Saving data one last time.                 
 SaveFunc()                 
                     
-#==============================================================================
-# 4: Save data  
-#==============================================================================
-#%%
-                    
 
-
-#ParmDir=
-
-
-
-
-#DeltaD=D[:,:,1:]-D[:,:,:(NSF.TimeStepsJump-1)]
-#Y1=[norm(DeltaD[:,:,n]) for n in range(0,NSF.TimeStepsJump-1)]
-#Y2=[norm(D[:,:,n]) for n in range(0,NSF.TimeStepsJump)]
-#figure(1)
-#clf()
-##plot(Y1,'r')
-##plot(Y2,'b')
-#plot(Plist)
-
-##%%
-#DL=array(DecayList)
-#xx=where(DL[:,2]=="Cavity")
-#ff=DL[xx,1].astype(float)[0,:]
-#figure(1)
-#clf()
-#plot(ff,JOBlist,'.k')
-##plot(ff,COHlist,'.r')
-#xlabel("Frequency")
-#ylabel("Closeness to B")
-#
-#figure(2)
-#clf()
-#plot(ff,COHlist,'.k')
-##plot(ff,COHlist,'.r')
-#xlabel("Frequency")
-#ylabel("Closeness to B")
