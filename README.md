@@ -43,4 +43,6 @@ Extracts data from ../Data/InteractionPictureEvolutions, and plots releveant dat
 ## Running the code  
 To run the code, make sure all directories above exist. Then Run SSE_Evolution.py with the desired parameters set. Auxilliary data will automatically be created using the other scripts, if it is not already generated. 
 
-Data is saved to the disk every 30 minutes during the iterative solution. At any point, the already-generated data can be examined using DataExtractorStrob.py 
+Data is saved to the disk every 30 minutes during the iterative solution. At any point, the already-generated data can be examined using DataExtractorStrob.py. 
+
+Progress can be monitored continually by reading the log files. 
